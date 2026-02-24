@@ -1,0 +1,13 @@
+@use "../vars";
+
+.header {
+  height: 30px;
+
+  background-color: #444;
+
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: vars.$sidebar-width;
+  z-index: vars.$z-index-header;
+}

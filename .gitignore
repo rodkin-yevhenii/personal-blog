@@ -2,6 +2,7 @@
 .idea
 
 # Folders
+/lessons-data
 /node_modules
 /dist
 

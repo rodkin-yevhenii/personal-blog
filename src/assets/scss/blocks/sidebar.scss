@@ -1,0 +1,13 @@
+@use "../vars";
+
+.sidebar {
+  width: vars.$sidebar-width;
+  height: 100vh;
+
+  background-color: #ccc;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: vars.$z-index-sidebar;
+}

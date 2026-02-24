@@ -1,5 +1,28 @@
-body {
-    background-color: black;
-    font-size: 21px;
-    color: white;
+@use "vars";
+@use "vendor/reset";
+
+/* Blocks */
+@use "blocks/page";
+@use "blocks/header";
+@use "blocks/sidebar";
+@use "blocks/main";
+@use "blocks/container";
+
+html {
+    font-size: 62.5%;
 }
+
+*,
+*:before,
+*:after {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #181818;
+
+    font-family: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    font-size: 1.4rem;
+    color: vars.$white;
+}
+
