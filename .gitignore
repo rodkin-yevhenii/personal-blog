@@ -1,5 +1,9 @@
 # IDE Folders
 .idea
 
-# Lessons data
-/assets/lesson-data
+# Folders
+/node_modules
+/dist
+
+# Files
+/package-lock.json
