@@ -7,6 +7,9 @@
 @use "blocks/sidebar";
 @use "blocks/main";
 @use "blocks/container";
+@use "blocks/profile";
+@use "blocks/social";
+@use "blocks/btn";
 
 html {
     font-size: 62.5%;
@@ -23,6 +26,7 @@ body {
 
     font-family: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
     font-size: 1.4rem;
+    line-height: 1.5;
     color: vars.$white;
 }
 

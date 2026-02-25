@@ -1,0 +1,39 @@
+@use "../vars";
+
+.btn {
+  display: inline-block;
+  vertical-align: top;
+  padding: 1.15em 2.1em;
+
+  background: vars.$secondary;
+  border: none;
+  cursor: pointer;
+  border-radius: 3em;
+
+  font-family: inherit;
+  font-size: 1.2rem;
+  line-height: 1.1;
+  font-weight: 500;
+  color: vars.$white;
+  text-decoration: none;
+
+  transition: background-color .2s linear;
+
+  &--red {
+    background: vars.$red;
+    box-shadow: 0 7px 17px -10px rgba(vars.$red, .3);
+
+    &:hover {
+      background-color: darken(vars.$red, 5%);
+    }
+  }
+
+  &--blue {
+    background: vars.$blue;
+    box-shadow: 0 7px 17px -10px rgba(vars.$blue, .3);
+
+    &:hover {
+      background-color: darken(vars.$blue, 5%);
+    }
+  }
+}
