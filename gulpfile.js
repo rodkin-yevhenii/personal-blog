@@ -1,229 +1,151 @@
 "use strict";
 
-const {src, dest} = require("gulp");
-const gulp = require("gulp");
-const autoprefixer = require("gulp-autoprefixer");
-const cssbeautify = require("gulp-cssbeautify");
-const removeComments = require('gulp-strip-css-comments');
-const rename = require("gulp-rename");
-const sass = require("gulp-sass")(require("sass"));
-const cssnano = require("gulp-cssnano");
-const uglify = require("gulp-uglify");
-const plumber = require("gulp-plumber");
-const panini = require("panini");
-const del = require("del");
-const notify = require("gulp-notify");
-const webpack = require('webpack');
-const webpackStream = require('webpack-stream');
+const { src, dest, watch, series, parallel } = require("gulp");
 const browserSync = require("browser-sync").create();
+const sass = require("gulp-sass")(require("sass"));
+const postcss = require("gulp-postcss");
+const autoprefixer = require("autoprefixer");
+const plumber = require("gulp-plumber");
+const rename = require("gulp-rename");
+const notify = require("gulp-notify");
+const webpackStream = require("webpack-stream");
+const webpack = require("webpack");
+const panini = require("panini");
+const cssnano = require("cssnano");
+const { deleteAsync } = require("del");
 
+const isProd = process.env.NODE_ENV === "production";
 
-/* Paths */
-const srcPath = 'src/';
-const distPath = 'dist/';
+const srcPath = "src/";
+const distPath = "dist/";
 
 const path = {
     build: {
-        html:   distPath,
-        js:     distPath + "assets/js/",
-        css:    distPath + "assets/css/",
+        html: distPath,
+        js: distPath + "assets/js/",
+        css: distPath + "assets/css/",
         images: distPath + "assets/images/",
-        fonts:  distPath + "assets/fonts/"
+        fonts: distPath + "assets/fonts/",
     },
     src: {
-        html:   srcPath + "*.html",
-        js:     srcPath + "assets/js/*.js",
-        css:    srcPath + "assets/scss/*.scss",
+        html: srcPath + "*.html",
+        js: srcPath + "assets/js/**/*.js",
+        css: srcPath + "assets/scss/**/*.scss",
         images: srcPath + "assets/images/**/*.{jpg,png,svg,gif,ico,webp,webmanifest,xml,json}",
-        fonts:  srcPath + "assets/fonts/**/*.{eot,woff,woff2,ttf,svg}"
+        fonts: srcPath + "assets/fonts/**/*.{eot,woff,woff2,ttf,svg}",
     },
-    watch: {
-        html:   srcPath + "**/*.html",
-        js:     srcPath + "assets/js/**/*.js",
-        css:    srcPath + "assets/scss/**/*.scss",
-        images: srcPath + "assets/images/**/*.{jpg,png,svg,gif,ico,webp,webmanifest,xml,json}",
-        fonts:  srcPath + "assets/fonts/**/*.{eot,woff,woff2,ttf,svg}"
-    },
-    clean: "./" + distPath
+};
+
+function clean() {
+    return deleteAsync(distPath);
 }
-
-
-
-/* Tasks */
 
 function serve() {
     browserSync.init({
-        server: {
-            baseDir: "./" + distPath
-        }
+        server: { baseDir: distPath },
     });
 }
 
-function html(cb) {
+function html() {
     panini.refresh();
-    return src(path.src.html, {base: srcPath})
+    return src(path.src.html, { base: srcPath })
         .pipe(plumber())
-        .pipe(panini({
-            root:       srcPath,
-            layouts:    srcPath + 'layouts/',
-            partials:   srcPath + 'partials/',
-            helpers:    srcPath + 'helpers/',
-            data:       srcPath + 'data/'
-        }))
+        .pipe(
+            panini({
+                root: srcPath,
+                layouts: srcPath + "layouts/",
+                partials: srcPath + "partials/",
+                helpers: srcPath + "helpers/",
+                data: srcPath + "data/",
+            })
+        )
         .pipe(dest(path.build.html))
-        .pipe(browserSync.reload({stream: true}));
-
-    cb();
+        .pipe(browserSync.stream());
 }
 
-function css(cb) {
-    return src(path.src.css, {base: srcPath + "assets/scss/"})
-        .pipe(plumber({
-            errorHandler : function(err) {
-                notify.onError({
-                    title:    "SCSS Error",
-                    message:  "Error: <%= error.message %>"
-                })(err);
-                this.emit('end');
-            }
-        }))
-        .pipe(sass({
-            includePaths: './node_modules/'
-        }))
-        .pipe(autoprefixer({
-            cascade: true
-        }))
-        .pipe(cssbeautify())
+function styles() {
+    return src(path.src.css, { base: srcPath + "assets/scss/" })
+        .pipe(
+            plumber({
+                errorHandler(err) {
+                    notify.onError({
+                        title: "SCSS Error",
+                        message: err.message,
+                    })(err);
+                    this.emit("end");
+                },
+            })
+        )
+        .pipe(sass({ includePaths: "./node_modules/" }))
+        .pipe(postcss([
+            autoprefixer(),
+            ...(isProd ? [cssnano()] : [])
+        ]))
+        .pipe(rename({ suffix: isProd ? ".min" : "" }))
         .pipe(dest(path.build.css))
-        .pipe(cssnano({
-            zindex: false,
-            discardComments: {
-                removeAll: true
-            }
-        }))
-        .pipe(removeComments())
-        .pipe(rename({
-            suffix: ".min",
-            extname: ".css"
-        }))
-        .pipe(dest(path.build.css))
-        .pipe(browserSync.reload({stream: true}));
-
-    cb();
+        .pipe(browserSync.stream());
 }
 
-function cssWatch(cb) {
-    return src(path.src.css, {base: srcPath + "assets/scss/"})
-        .pipe(plumber({
-            errorHandler : function(err) {
-                notify.onError({
-                    title:    "SCSS Error",
-                    message:  "Error: <%= error.message %>"
-                })(err);
-                this.emit('end');
-            }
-        }))
-        .pipe(sass({
-            includePaths: './node_modules/'
-        }))
-        .pipe(rename({
-            suffix: ".min",
-            extname: ".css"
-        }))
-        .pipe(dest(path.build.css))
-        .pipe(browserSync.reload({stream: true}));
-
-    cb();
-}
-
-function js(cb) {
-    return src(path.src.js, {base: srcPath + 'assets/js/'})
-        .pipe(plumber({
-            errorHandler : function(err) {
-                notify.onError({
-                    title:    "JS Error",
-                    message:  "Error: <%= error.message %>"
-                })(err);
-                this.emit('end');
-            }
-        }))
-        .pipe(webpackStream({
-          mode: "production",
-          output: {
-            filename: 'app.js',
-          }
-        }))
+function scripts() {
+    return src(path.src.js, { base: srcPath + "assets/js/" })
+        .pipe(
+            plumber({
+                errorHandler(err) {
+                    notify.onError({
+                        title: "JS Error",
+                        message: err.message,
+                    })(err);
+                    this.emit("end");
+                },
+            })
+        )
+        .pipe(
+            webpackStream(
+                {
+                    mode: isProd ? "production" : "development",
+                    output: { filename: "app.js" },
+                    module: {
+                        rules: [
+                            {
+                                test: /\.js$/,
+                                exclude: /node_modules/,
+                                use: {
+                                    loader: "babel-loader",
+                                    options: {
+                                        presets: ["@babel/preset-env"],
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                },
+                webpack
+            )
+        )
         .pipe(dest(path.build.js))
-        .pipe(browserSync.reload({stream: true}));
-
-    cb();
+        .pipe(browserSync.stream());
 }
 
-function jsWatch(cb) {
-    return src(path.src.js, {base: srcPath + 'assets/js/'})
-        .pipe(plumber({
-            errorHandler : function(err) {
-                notify.onError({
-                    title:    "JS Error",
-                    message:  "Error: <%= error.message %>"
-                })(err);
-                this.emit('end');
-            }
-        }))
-        .pipe(webpackStream({
-          mode: "development",
-          output: {
-            filename: 'app.js',
-          }
-        }))
-        .pipe(dest(path.build.js))
-        .pipe(browserSync.reload({stream: true}));
-
-    cb();
-}
-
-function images(cb) {
+function images() {
     return src(path.src.images)
         .pipe(dest(path.build.images))
-        .pipe(browserSync.reload({stream: true}));
-
-    cb();
+        .pipe(browserSync.stream());
 }
 
-function fonts(cb) {
+function fonts() {
     return src(path.src.fonts)
         .pipe(dest(path.build.fonts))
-        .pipe(browserSync.reload({stream: true}));
-
-    cb();
+        .pipe(browserSync.stream());
 }
 
-function clean(cb) {
-    return del(path.clean);
-
-    cb();
+function watcher() {
+    watch(srcPath + "**/*.html", html);
+    watch(path.src.css, styles);
+    watch(path.src.js, scripts);
+    watch(path.src.images, images);
+    watch(path.src.fonts, fonts);
 }
 
-function watchFiles() {
-    gulp.watch([path.watch.html], html);
-    gulp.watch([path.watch.css], cssWatch);
-    gulp.watch([path.watch.js], jsWatch);
-    gulp.watch([path.watch.images], images);
-    gulp.watch([path.watch.fonts], fonts);
-}
-
-const build = gulp.series(clean, gulp.parallel(html, css, js, images, fonts));
-const watch = gulp.parallel(build, watchFiles, serve);
-
-
-
-/* Exports Tasks */
-exports.html = html;
-exports.css = css;
-exports.js = js;
-exports.images = images;
-exports.fonts = fonts;
 exports.clean = clean;
-exports.build = build;
-exports.watch = watch;
-exports.default = watch;
+exports.build = series(clean, parallel(html, styles, scripts, images, fonts));
+exports.default = series(exports.build, parallel(watcher, serve));
