@@ -1,0 +1,31 @@
+@use "../vars";
+
+.subnav {
+  display: none;
+  padding: .5rem 0;
+
+  width: 16.5rem;
+
+  background-color: vars.$blue;
+  border-radius: 0 0 5px 5px;
+  box-shadow: 0 6px 8px rgba(vars.$black,.2);
+
+  position: absolute;
+  top: 100%;
+  left: 0;
+}
+
+.subnav__link {
+  display: block;
+  padding: .45rem 1.2rem;
+
+  font-size: 1.2rem;
+  color: vars.$white;
+  text-decoration: none;
+
+  transition: background-color .2s ease-in-out;
+
+  &:hover {
+    background-color: darken(vars.$blue, 5%);
+  }
+}

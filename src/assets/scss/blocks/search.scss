@@ -1,0 +1,23 @@
+@use '../vars';
+
+.search {
+  background-color: vars.$primary;
+  width: 100%;
+  max-width: 21rem;
+}
+
+.search__input {
+  display: block;
+  width: 100%;
+  padding: 1.2rem 2rem;
+  background-color: transparent;
+  border: none;
+
+  font-family: inherit;
+  font-size:1.2rem;
+  color: vars.$white;
+
+  &::placeholder {
+    color: rgba(vars.$white, .4);
+  }
+}

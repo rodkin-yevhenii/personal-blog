@@ -1,13 +1,24 @@
 @use "../vars";
 
 .header {
-  height: 30px;
+  display: flex;
+  width: calc(100% - #{vars.$sidebar-width});
 
-  background-color: #444;
+  background-color: #0D0D0D;
+  box-shadow: 0 5px 22px rgba(vars.$black, .25);
 
   position: fixed;
   top: 0;
   right: 0;
-  left: vars.$sidebar-width;
   z-index: vars.$z-index-header;
+}
+
+.header__left {
+  width: 60%;
+}
+
+.header__right {
+  width: 40%;
+  display: flex;
+  justify-content: flex-end;
 }

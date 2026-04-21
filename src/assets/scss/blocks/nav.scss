@@ -1,0 +1,50 @@
+@use '../vars';
+
+.nav__list {
+  display: flex;
+}
+
+.nav__item {
+  position: relative;
+
+  &:hover {
+    background-color: vars.$blue;
+
+    > .subnav {
+      display: block;
+    }
+  }
+}
+
+.nav__link {
+  display: block;
+  padding: 1.4rem;
+
+  font-size: 1.1rem;
+  line-height: 1.2rem;
+  text-transform: uppercase;
+  color: vars.$white;
+  text-decoration: none;
+
+  transition: background-color .2s linear;
+
+  &.has-subnav {
+    position: relative;
+    padding-right: 3.5rem;
+
+    &:after {
+      content: '';
+      display: block;
+      margin-top: 2px;
+
+      border-style: solid;
+      border-width: .6rem .5rem 0 .5rem;
+      border-color: vars.$white transparent transparent transparent;
+
+      position: absolute;
+      top: 50%;
+      right: 1.4rem;
+      transform: translateY(-50%);
+    }
+  }
+}
